@@ -67,12 +67,14 @@ If RELATIVE is t, then return relative paths and remove org extension."
 
 (defun org-brain-pins ()
   "Get list of org-brain entries with \"BRAIN_PIN\" keyword."
-  (-non-nil
-   (mapcar
-    (lambda (entry)
-      (when (assoc "BRAIN_PIN" (org-brain-keywords entry))
-        entry))
-    (org-brain-files t))))
+  (mapcar 'org-brain-path-entry-name
+          (-remove-last 'identity
+                        (split-string
+                         (shell-command-to-string (concat
+                                                   "grep --files-with-matches '#+BRAIN_PIN'" " "
+                                        ; (org-brain-files) returns a list, we need a string
+                                                   (mapconcat 'identity (org-brain-files) " ")))
+                         "\n"))))
 
 (defun org-brain-path-entry-name (path)
   "Get PATH as an org-brain entry name."
@@ -84,39 +86,30 @@ If RELATIVE is t, then return relative paths and remove org extension."
 
 (defun org-brain-parents (entry)
   "Get list of org-brain entries which links to ENTRY."
-  (-non-nil
-   (mapcar
-    (lambda (brainfile)
-      (let ((brainfile-entry (org-brain-path-entry-name brainfile)))
-        (unless (string-equal brainfile-entry entry)
-          (org-element-map
-              (with-temp-buffer
-                (insert-file-contents brainfile)
-                (org-element-parse-buffer))
-              'link
-            (lambda (link)
-              (when (and (string-equal (org-element-property :type link) "brain")
-                         (string-equal (car (split-string (org-element-property :path link) "::"))
-                                       entry))
-                brainfile-entry))
-            nil t))))
-    (org-brain-files))))
+  (mapcar 'org-brain-path-entry-name
+          (-remove-last 'identity
+                        (split-string
+                         (shell-command-to-string (concat
+                                                   "grep --files-with-matches brain:" entry " "
+                                        ; (org-brain-files) returns a list, we need a string
+                                                   (mapconcat 'identity (org-brain-files) " ")))
+                         "\n"))))
 
 (defun org-brain-children (entry &optional exclude)
   "Get list of org-brain entries linked to from ENTRY.
 You can choose to EXCLUDE an entry from the list."
-  (delete
-   exclude
-   (delete-dups
-    (org-element-map
-        (with-temp-buffer
-          (ignore-errors (insert-file-contents (org-brain-entry-path entry)))
-          (org-element-parse-buffer))
-        'link
-      (lambda (link)
-        (when (string-equal (org-element-property :type link) "brain")
-          (let ((link-entry (car (split-string (org-element-property :path link) "::"))))
-            (unless (string-equal link-entry entry) link-entry))))))))
+  (let ((children))
+    (with-temp-buffer
+      (ignore-errors
+        (insert-file-contents (org-brain-entry-path entry))
+        (goto-char (point-min))
+        (while (re-search-forward "brain:\\([a-zA-Z0-9_]+\\)")
+          (let ((link-entry (match-string-no-properties 1)))
+            (unless (or (string-equal link-entry entry)
+                        (string-equal link-entry exclude)
+                        (member link-entry children))
+              (push link-entry children)))))
+        children)))
 
 (defun org-brain-keywords (entry)
   "Get alist of `org-mode' keywords and their values in org-brain ENTRY."
@@ -129,8 +122,13 @@ You can choose to EXCLUDE an entry from the list."
 
 (defun org-brain-title (entry)
   "Get title of ENTRY. Use entry name if no title keyword is provided."
-  (or (cdr (assoc "TITLE" (org-brain-keywords entry)))
-      (org-link-unescape (file-name-base entry))))
+  (with-temp-buffer
+    (ignore-errors
+      (insert-file-contents (org-brain-entry-path entry))
+      (goto-char (point-min))
+      (re-search-forward "#\\+TITLE: \\(.*\\)")
+      (or (match-string-no-properties 1)
+          (org-link-unescape (file-name-base entry))))))
 
 ;;;###autoload
 (defun org-brain-insert-link ()
@@ -269,42 +267,42 @@ ignore certain sibling links to show."
     (read-only-mode -1)
     (delete-region (point-min) (point-max))
     ;; Pinned entries
-    (insert "PINNED:")
-    (mapc (lambda (pin)
-            (insert "  ")
-            (org-brain-insert-visualize-button pin))
-          (org-brain-pins))
-    (insert "\n\n\n")
+    ;; (insert "PINNED:")
+    ;; (mapc (lambda (pin)
+    ;;         (insert "  ")
+    ;;         (org-brain-insert-visualize-button pin))
+    ;;       (org-brain-pins))
+    ;; (insert "\n\n\n")
     ;; Draw parent entries and siblings
     (let ((parent-positions nil)
           (max-width 0))
-      (mapc (lambda (parent)
-              (push parent ignored-siblings)
-              (let ((children-links (-difference (org-brain-children parent entry)
-                                                 ignored-siblings))
-                    (col-start (+ 3 max-width))
-                    (parent-title (org-brain-title parent)))
-                (goto-line 4)
-                (mapc
-                 (lambda (child)
-                   (picture-forward-column col-start)
-                   (insert (make-string (1+ (length parent-title)) ?\ ) "/ ")
-                   (org-brain-insert-visualize-button child)
-                   (setq max-width (max max-width (current-column)))
-                   (newline (forward-line 1))
-                   (push child ignored-siblings))
-                 children-links)
-                (goto-line 4)
-                (forward-line (1- (length children-links)))
-                (picture-forward-column col-start)
-                (push (cons (picture-current-line)
-                            (+ (current-column) (/ (length parent-title) 2)))
-                      parent-positions)
-                (org-brain-insert-visualize-button parent)
-                (setq max-width (max max-width (current-column)))
-                (when children-links
-                  (delete-char (length parent-title)))))
-            (org-brain-parents entry))
+      ;; (mapc (lambda (parent)
+      ;;         (push parent ignored-siblings)
+      ;;         (let ((children-links (-difference (org-brain-children parent entry)
+      ;;                                            ignored-siblings))
+      ;;               (col-start (+ 3 max-width))
+      ;;               (parent-title (org-brain-title parent)))
+      ;;           (goto-line 4)
+      ;;           (mapc
+      ;;            (lambda (child)
+      ;;              (picture-forward-column col-start)
+      ;;              (insert (make-string (1+ (length parent-title)) ?\ ) "/ ")
+      ;;              (org-brain-insert-visualize-button child)
+      ;;              (setq max-width (max max-width (current-column)))
+      ;;              (newline (forward-line 1))
+      ;;              (push child ignored-siblings))
+      ;;            children-links)
+      ;;           (goto-line 4)
+      ;;           (forward-line (1- (length children-links)))
+      ;;           (picture-forward-column col-start)
+      ;;           (push (cons (picture-current-line)
+      ;;                       (+ (current-column) (/ (length parent-title) 2)))
+      ;;                 parent-positions)
+      ;;           (org-brain-insert-visualize-button parent)
+      ;;           (setq max-width (max max-width (current-column)))
+      ;;           (when children-links
+      ;;             (delete-char (length parent-title)))))
+      ;;       (org-brain-parents entry))
       ;; Draw lines
       (when parent-positions
         (let ((maxline (line-number-at-pos (point-max))))
