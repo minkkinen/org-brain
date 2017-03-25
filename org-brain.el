@@ -86,14 +86,15 @@ If RELATIVE is t, then return relative paths and remove org extension."
 
 (defun org-brain-parents (entry)
   "Get list of org-brain entries which links to ENTRY."
-  (mapcar 'org-brain-path-entry-name
-          (-remove-last 'identity
-                        (split-string
-                         (shell-command-to-string (concat
-                                                   "grep --files-with-matches brain:" entry " "
+  (delete entry
+          (mapcar 'org-brain-path-entry-name
+                  (-remove-last 'identity
+                                (split-string
+                                 (shell-command-to-string (concat
+                                                           "grep --files-with-matches brain:" entry " "
                                         ; (org-brain-files) returns a list, we need a string
-                                                   (mapconcat 'identity (org-brain-files) " ")))
-                         "\n"))))
+                                                           (mapconcat 'identity (org-brain-files) " ")))
+                                 "\n")))))
 
 (defun org-brain-children (entry &optional exclude)
   "Get list of org-brain entries linked to from ENTRY.
