@@ -127,7 +127,7 @@ You can choose to EXCLUDE an entry from the list."
     (ignore-errors
       (insert-file-contents (org-brain-entry-path entry))
       (goto-char (point-min))
-      (if (re-search-forward "#\\+TITLE: \\(.*\\)")
+      (if (re-search-forward "#\\+TITLE: \\(.*\\)" nil t)
           (match-string-no-properties 1)
         (org-link-unescape (file-name-base entry))))))
 
