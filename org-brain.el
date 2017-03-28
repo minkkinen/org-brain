@@ -91,7 +91,7 @@ If RELATIVE is t, then return relative paths and remove org extension."
                   (-remove-last 'identity
                                 (split-string
                                  (shell-command-to-string (concat
-                                                           "grep --files-with-matches brain:" entry " "
+                                                           "grep --files-with-matches brain:" entry "[^_] "
                                         ; (org-brain-files) returns a list, we need a string
                                                            (mapconcat 'identity (org-brain-files) " ")))
                                  "\n")))))
