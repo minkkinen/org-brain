@@ -267,7 +267,7 @@ ignore certain sibling links to show."
   (with-current-buffer (get-buffer-create "*org-brain*")
     (read-only-mode -1)
     (delete-region (point-min) (point-max))
-    Pinned entries
+    ;; Pinned entries
     (insert "PINNED:")
     (mapc (lambda (pin)
             (insert "  ")
