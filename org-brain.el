@@ -104,7 +104,7 @@ You can choose to EXCLUDE an entry from the list."
       (ignore-errors
         (insert-file-contents (org-brain-entry-path entry))
         (goto-char (point-min))
-        (while (re-search-forward "brain:\\([a-zA-Z0-9_]+\\)")
+        (while (re-search-forward "brain:\\([a-zA-Z0-9_/]+\\)")
           (let ((link-entry (match-string-no-properties 1)))
             (unless (or (string-equal link-entry entry)
                         (string-equal link-entry exclude)
