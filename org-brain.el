@@ -295,7 +295,7 @@ the concept map buffer will gain focus."
                 (mapc
                  (lambda (child)
                    (picture-forward-column col-start)
-                   (insert (make-string (1+ (length parent-title)) ?\ ) "/ ")
+                   (insert (make-string (1+ (length parent-title)) ?\ ) "➝ ")
                    (org-brain-insert-visualize-button child)
                    (setq max-width (max max-width (current-column)))
                    (newline (forward-line 1))
@@ -329,7 +329,7 @@ the concept map buffer will gain focus."
                   (while (< (line-number-at-pos (point))
                             maxline)
                     (picture-move-down 1)
-                    (insert "|")
+                    (insert "｜")
                     (unless (looking-at-p "\n") (delete-char 1)))
                   (picture-move-down 1)
                   (ignore-errors
@@ -345,9 +345,9 @@ the concept map buffer will gain focus."
             (insert "*")
             (backward-char 1)
             (picture-move-down 1)
-            (insert "|")
+            (insert "｜")
             (picture-move-down 1))
-          (insert "↓"))))
+          (insert "⭣"))))
     ;; Insert main entry name
     (picture-move-down 1)
     (let ((half-title-length (/ (length (org-brain-title entry)) 2)))
