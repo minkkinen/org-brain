@@ -329,7 +329,7 @@ the concept map buffer will gain focus."
                   (while (< (line-number-at-pos (point))
                             maxline)
                     (picture-move-down 1)
-                    (insert "｜")
+                    (insert "|")
                     (unless (looking-at-p "\n") (delete-char 1)))
                   (picture-move-down 1)
                   (ignore-errors
@@ -345,7 +345,7 @@ the concept map buffer will gain focus."
             (insert "*")
             (backward-char 1)
             (picture-move-down 1)
-            (insert "｜")
+            (insert "|")
             (picture-move-down 1))
           (insert "⭣"))))
     ;; Insert main entry name
