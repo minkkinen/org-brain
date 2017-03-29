@@ -377,6 +377,7 @@ ignore certain sibling links to show."
       ;; Finishing
       (org-brain-visualize-mode)
       (pop-to-buffer "*org-brain*")
+      (delete-other-windows)
       (goto-char entry-pos)))
   (setq org-brain--visualizing-entry entry))
 
