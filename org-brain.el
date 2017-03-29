@@ -347,7 +347,7 @@ the concept map buffer will gain focus."
             (picture-move-down 1)
             (insert "|")
             (picture-move-down 1))
-          (insert "V"))))
+          (insert "↓"))))
     ;; Insert main entry name
     (picture-move-down 1)
     (let ((half-title-length (/ (length (org-brain-title entry)) 2)))
@@ -367,21 +367,22 @@ the concept map buffer will gain focus."
                 (insert "  ")))
             (org-brain-children entry))
       ;; Insert headlines in entry file
-      (insert "\n\n-----------------------------------------------\n\n")
+      (insert "\n\n――――――――――――――――――――――――――――――――――――――――――――――――――\n\n")
       (org-element-map (with-temp-buffer
                          (ignore-errors (insert-file-contents (org-brain-entry-path entry)))
                          (org-element-parse-buffer))
           'headline
         (lambda (headline)
-          (insert (make-string (org-element-property :level headline) ?*) " ")
-          (insert-text-button
-           (org-element-property :raw-value headline)
-           'action (lambda (x)
-                     (org-open-file (org-brain-entry-path entry)
-                                    nil nil
-                                    (concat "*" (org-element-property
-                                                 :raw-value headline)))))
-          (insert "\n")))
+          (when (equal (org-element-property :level headline) 1)
+            (insert (make-string (org-element-property :level headline) ?•) " ")
+            (insert-text-button
+             (org-element-property :raw-value headline)
+             'action (lambda (x)
+                       (org-open-file (org-brain-entry-path entry)
+                                      nil nil
+                                      (concat "*" (org-element-property
+                                                   :raw-value headline)))))
+            (insert "\n"))))
       ;; Finishing
       (org-brain-visualize-mode)
       (goto-char entry-pos)
