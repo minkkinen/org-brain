@@ -321,7 +321,7 @@ the concept map buffer will gain focus."
           (picture-move-down 1)
           (insert (make-string (1+ (- (cdar parent-positions)
                                       (cdr (-last-item parent-positions))))
-                               ?-))
+                               ?―))
           ;; Lines from parents to bottom
           (mapc (lambda (pos)
                   (goto-line (car pos))
@@ -334,7 +334,7 @@ the concept map buffer will gain focus."
                   (picture-move-down 1)
                   (ignore-errors
                     (delete-char 1))
-                  (insert "*"))
+                  (insert "•"))
                 parent-positions)
           ;; Line to main entry
           (move-to-column (/ (+ (cdr (-last-item parent-positions))
@@ -347,7 +347,7 @@ the concept map buffer will gain focus."
             (picture-move-down 1)
             (insert "|")
             (picture-move-down 1))
-          (insert "⭣"))))
+          (insert "▼"))))
     ;; Insert main entry name
     (picture-move-down 1)
     (let ((half-title-length (/ (length (org-brain-title entry)) 2)))
