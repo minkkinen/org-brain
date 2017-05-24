@@ -1,4 +1,4 @@
-#+TITLE:org-brain
+#+TITLE:org-brain [[http://melpa.org/#/org-brain][file:http://melpa.org/packages/org-brain-badge.svg]]
 
 =org-brain= implements a variant of [[https://en.wikipedia.org/wiki/Concept_map][concept mapping]] in Emacs, using [[http://orgmode.org/][org-mode]]. It
 is heavily inspired by a piece of software called [[http://thebrain.com/][The Brain]] (but currently with
@@ -54,36 +54,48 @@ be pressed to visualize other entries, visit resources etc.
 
 * Setup and requirements
 
-The easiest way is to get =org-brain= from MELPA. If you do not want to do that or
-would like this fork which includes caching and an extended visualize interface,
-here's the steps to install it manually:
+The easiest way is to get =org-brain= from MELPA. If you do not want to do that,
+clone the repository or download =org-brain.el= and add it to your load-path.
+The example below is using [[https://github.com/jwiegley/use-package][use-package]] and that you're using MELPA, but you
+could use =(require 'org-brain)= or add a =:load-path= to =use-package= instead.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package org-brain :ensure t
+    :init
+    (setq org-brain-path "directory/path/where-i-want-org-brain")
+    ;; For Evil users
+    (eval-after-load 'evil
+      (evil-set-initial-state 'org-brain-visualize-mode 'emacs))
+    :config
+    ;; Save/load org-brain caches to/from disk
+    (org-brain-activate-cache-saving))
+#+END_SRC
 
 1. =org-brain= requires Emacs 25, org-mode 9. These need to be part of your Emacs.
-2. Clone the repo locally (plug for [[https://github.com/motemen/ghq][ghq]] to manage local repo cloning).
-3. Utilize =use-package= to load the repo. (Alternatively, download =org-brain.el=, add it to your load-path, and put =(require 'org-brain)= in your init-file.)
-   #+begin_src emacs-lisp
-   (use-package org-brain
-     ;; :ensure t ; If you want to use MELPA package which doesn't include the caching and extended visualize interface.
-     :load-path "~/.ghq/github.com/analyticd/org-brain"
-     :init
-     (setq org-brain-path "/path/to/where/you/want/to/keep/your/org/brain/files/or/just/your/existing/org/files/directory"))
-   #+end_src
-4. Configure =org-brain-path= (defaults to =/brain= in your =org-directory=) to a directory where you want to put your =org-brain= files (which could be the location where you already keep your org files if you wish to transform your existing org files into =org-brain= files)
-   You can set this with the example config presented above or through the customize interface, 
-5. If you are an evil user, you'll want to add =(evil-set-initial-state 'org-brain-visualize-mode 'emacs)= to your =org-brain= configuration. Here is the config example above, updated:
-   #+begin_src emacs-lisp
-   (use-package org-brain
-     ;; :ensure t ; If you want to use MELPA package which doesn't include the caching and extended visualize interface.
-     :load-path "~/.ghq/github.com/analyticd/org-brain"
-     :init
-     (setq org-brain-path "/path/to/where/you/want/to/keep/your/org/brain/files/or/your/existing/org/files/directory")
-     (eval-after-load 'evil
-       (evil-set-initial-state 'org-brain-visualize-mode 'emacs)))
-   #+end_src
+2. Configure =org-brain-path= (defaults to =/brain= in your =org-directory=) to
+   a directory where you want to put your =org-brain= files (which could be the
+   location where you already keep your org files if you wish to transform your
+   existing org files into =org-brain= files). You can set this with the example
+   config presented above or through the customize interface,
+3. If you are an [[https://github.com/emacs-evil/evil][evil]] user, you'll want to add =(evil-set-initial-state
+   'org-brain-visualize-mode 'emacs)= to your =org-brain= configuration (see
+   example above).
+4. =org-brain= uses caches in order to speed up loading of entries. If you want
+   to save these caches between Emacs sessions (saving time when you restart
+   Emacs) put =(org-brain-activate-cache-saving)= in your init (included in
+   example above).
+5. If /not using/ =org-brain-activate-cache-saving= you might want to eagerly
+   build some of the caches (rather than wait to have them built automatically
+   in a lazy way), you may use =org-brain-build-caches= either interactively or
+   programatically, perhaps during Emacs startup time (while you get your
+   coffee). You'll be adding about 15 seconds to Emacs startup time in exchange
+   for the same savings of save on your initial use of org-brain.
 
 * Usage
 
-Primarily you should interact with the =M-x org-brain-visualize= interface in order to benefit from automatic caching and thus dramatic speed gains (~30x faster).
+Primarily you should interact with the =M-x org-brain-visualize= interface in
+order to benefit from automatic caching and thus dramatic speed gains (~30x
+faster).
 
 Once in the org-brain-visualize interface/mode, via =M-x org-brain-visualize=, you can type:
 
@@ -94,13 +106,18 @@ Once in the org-brain-visualize interface/mode, via =M-x org-brain-visualize=, y
    mandolin;banjo= would add =guitar=, =mandolin= and =banjo= as children. Currently
    it isn't possible to use completion when batch entering children/parents, so
    it is best used for adding non-existing entries.
+<<<<<<< HEAD
    
+=======
+
+>>>>>>> upstream/master
    If you add children to a file with =org-brain-visualize=, the links to the child
    entries will be added under the first headline in the file with the
    =brainchildren= tag. If this headline doesn't exist, a headline named
    /Brainchildren/ will be created and will be given the tag. If you want another
    default name for these headlines, you can customize
    =org-brain-children-headline-default-name=.
+<<<<<<< HEAD
 3. "p" to create a parent for the current entry. You may enter several parents at
    once separated by =org-brain-batch-separator=, ";" by default, to
    simultaneously create more than one.
@@ -112,15 +129,48 @@ Once in the org-brain-visualize interface/mode, via =M-x org-brain-visualize=, y
    This will create a new title, prompting you for the value. If a
    title, #+TITLE: some-title, already exists then it will replace it with the
    new title you've provide.
+=======
+3. "C" to remove a child (link) for the current entry. This does not delete the
+   file pointed to by the child (link). You may enter several children at
+   once separated by =org-brain-batch-separator=, ";" by default, to
+   simultaneously remove more than one.
+4. "p" to create a parent for the current entry. You may enter several parents at
+   once separated by =org-brain-batch-separator=, ";" by default, to
+   simultaneously create more than one.
+5. "P" to remove a parent for the current entry. You may enter several parents at
+   once separated by =org-brain-batch-separator=, ";" by default, to
+   simultaneously remove more than one.
+6. "n" to pin the current entry (if it is already pinned, then =org-brain= will respect that)
+7. "N" to remove a pin from the current entry
+8. "r" to rename the current entry
+   This will only change the filename and entry name, not the =#+TITLE= of
+   the entry.
+9. "t" to add or change the title of the current entry
+   This will create a new title, prompting you for the value. If a
+   title, #+TITLE: some-title, already exists then it will be replaced with the
+   new title you've provide.
+10. "T" to remove a title of the current entry altogether.
+>>>>>>> upstream/master
 
 Here is the the full list of keybindings:
 
 | j / TAB   | Goto next link                        |
 | k / S-TAB | Goto previous link                    |
+<<<<<<< HEAD
 | c         | Add child                             |
 | p         | Add parent                            |
 | P         | Add pin                               |
 | t         | Add or change title                   |
+=======
+| c         | Add child(ren)                        |
+| C         | Remove child(ren)                     |
+| p         | Add parent(s)                         |
+| P         | Remove parent(s)                      |
+| n         | Add pin                               |
+| N         | Remove pin                            |
+| t         | Add or change title                   |
+| T         | Remove title                          |
+>>>>>>> upstream/master
 | l         | Add resource link                     |
 | C-y       | Paste resource link                   |
 | a         | Add resource [[http://orgmode.org/manual/Attachments.html][attachment]]               |
@@ -130,10 +180,16 @@ Here is the the full list of keybindings:
 
 In order to link to other entries, use an =org-mode= link
 with =brain:= type, its easiest to use =C-c C-l brain: TAB= or =M-x
+<<<<<<< HEAD
 org-brain-insert-link=. 
 
 =M-x org-brain-agenda= can be used to run =org-agenda= on your =org-brain= files. 
 
+=======
+org-brain-insert-link=.
+
+=M-x org-brain-agenda= can be used to run =org-agenda= on your =org-brain= files.
+>>>>>>> upstream/master
 
 If you add resources via =org-brain-visualize= they will be entered inserted under
 the current heading in the visualize buffer (link resource will be added as list
@@ -148,8 +204,13 @@ be inconsistent with actual state on disk. To remedy this situation, you may use
 caches will be rebuilt and speed of the org-brain-visualize interface/mode will
 become very fast again after an initial cache miss (which will cause the caches
 to be built). =org-brain-files= cache is built all at once on first cache miss
+<<<<<<< HEAD
 while org-brain-children-cache, org-brain-parents-cache, and
 org-brain-pins-cache are necessarily built node by node. Subsequent returns to
+=======
+while =org-brain-children-cache=, =org-brain-parents-cache=, and
+=org-brain-pins-cache= are necessarily built node by node. Subsequent returns to
+>>>>>>> upstream/master
 said cached nodes will be approximately 30x faster.
 
 * Other useful packages
